@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+
+{% block title %}Editar - GYM WORK{% endblock %}
+
+{% block content %}
+<style>
+/* === Fondo opaco === */
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: -1;
+}
+
+/* === Contenedor principal === */
+.editar-container {
+    background: linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.05));
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.2);
+    padding: 40px;
+    border-radius: 25px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    width: 90%;
+    max-width: 650px;
+    margin: 80px auto;
+    animation: floatUp 0.8s ease-out, floating 4s ease-in-out infinite;
+}
+
+/* === Animaciones === */
+@keyframes floatUp {
+    from { opacity: 0; transform: translateY(40px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+@keyframes floating {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+}
+
+/* === Título === */
+.editar-container h2 {
+    color: white;
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 25px;
+}
+
+/* === Formulario === */
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+label {
+    color: white;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+input {
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: none;
+    outline: none;
+    background: rgba(255,255,255,0.9);
+    font-weight: 500;
+}
+
+input[readonly] {
+    background: rgba(255,255,255,0.6);
+    cursor: not-allowed;
+}
+
+/* === Contenedor de botones === */
+.botones-container {
+    display: flex;
+    justify-content: center; /* Centra ambos botones horizontalmente */
+    gap: 20px; /* Espacio entre botones */
+    margin-top: 20px;
+}
+
+.btn-cancelar {
+    background: linear-gradient(135deg, #ff4d4d, #ff9999);
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 10px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+}
+
+.btn-cancelar:hover {
+    background: linear-gradient(135deg, #cc0000, #ff6666);
+    transform: translateY(-2px);
+}
+
+.btn-actualizar {
+    background: linear-gradient(135deg, #007bff, #00c6ff);
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 10px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-actualizar:hover {
+    background: linear-gradient(135deg, #0056b3, #0088cc);
+    transform: translateY(-2px);
+}
+</style>
+
+<div class="editar-container">
+    <h2>✏️ Editar Cliente</h2>
+    <form method="POST">
+        <label>Cédula:</label>
+        <input type="text" name="cedula" value="{{ cliente.cedula }}" readonly>
+
+        <label>Nombre:</label>
+        <input type="text" name="nombre" value="{{ cliente.nombre }}">
+
+        <label>Teléfono:</label>
+        <input type="text" name="telefono" value="{{ cliente.telefono }}">
+
+        <label>Correo:</label>
+        <input type="email" name="correo" value="{{ cliente.correo }}">
+
+        <div class="botones-container">
+            <a href="{{ url_for('listado') }}" class="btn-cancelar">❌ Cancelar</a>
+            <button type="submit" class="btn-actualizar">💾 Actualizar</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

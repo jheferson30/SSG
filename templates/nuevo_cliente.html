@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+
+{% block title %}Nuevo Cliente - Gimnasio{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow-sm p-4">
+        <h3 class="text-center mb-4">Registrar Nuevo Cliente</h3>
+        <form action="{{ url_for('nuevo_cliente') }}" method="POST">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="cedula" class="form-label">Cédula</label>
+                    <input type="text" class="form-control" id="cedula" name="cedula" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="nombre" class="form-label">Nombre Completo</label>
+                    <input type="text" class="form-control" id="nombre" name="nombre" required>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="telefono" class="form-label">Teléfono</label>
+                    <input type="text" class="form-control" id="telefono" name="telefono" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="correo" class="form-label">Correo Electrónico</label>
+                    <input type="email" class="form-control" id="correo" name="correo" required>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="plan" class="form-label">Plan</label>
+                <select class="form-select" id="plan" name="plan" required>
+                    <option value="">Seleccionar plan...</option>
+                    <option value="Básico">Básico</option>
+                    <option value="Intermedio">Intermedio</option>
+                    <option value="Avanzado">Avanzado</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="forma_pago" class="form-label">Forma de Pago</label>
+                <select class="form-select" id="forma_pago" name="forma_pago" required>
+                    <option value="">Seleccionar método...</option>
+                    <option value="Efectivo">Efectivo</option>
+                    <option value="Transferencia">Transferencia</option>
+                    <option value="Tarjeta">Tarjeta</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="valor_pagar" class="form-label">Valor a Pagar</label>
+                <input type="number" class="form-control" id="valor_pagar" name="valor_pagar" placeholder="Ingrese el valor a pagar" required>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="fecha_ingreso" class="form-label">Fecha de Inicio</label>
+                    <input type="datetime-local" class="form-control" id="fecha_ingreso" name="fecha_ingreso" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="duracion" class="form-label">Duración del Plan</label>
+                    <select class="form-select" id="duracion" name="duracion" required>
+                        <option value="">Seleccionar...</option>
+                        <option value="1">1 Mes</option>
+                        <option value="3">3 Meses</option>
+                        <option value="6">6 Meses</option>
+                        <option value="12">1 Año</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="fecha_retiro" class="form-label">Fecha de Retiro</label>
+                <input type="date" class="form-control" id="fecha_retiro" name="fecha_retiro" readonly>
+            </div>
+
+            <div class="mb-3">
+                <label for="estatus" class="form-label">Estado</label>
+                <select class="form-select" id="estatus" name="estatus" required>
+                    <option value="Activo">Activo</option>
+                    <option value="Inactivo">Inactivo</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-success w-100">Guardar Cliente</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    // === CALCULAR FECHA DE VENCIMIENTO AUTOMÁTICAMENTE ===
+    const fechaInicioInput = document.getElementById('fecha_ingreso');
+    const duracionSelect = document.getElementById('duracion');
+    const fechaFinInput = document.getElementById('fecha_retiro');
+
+    function calcularFechaFin() {
+        const inicio = new Date(fechaInicioInput.value);
+        const meses = parseInt(duracionSelect.value);
+        if (!isNaN(inicio.getTime()) && meses) {
+            const fin = new Date(inicio);
+            fin.setMonth(fin.getMonth() + meses);
+            fechaFinInput.value = fin.toISOString().split('T')[0];
+        } else {
+            fechaFinInput.value = '';
+        }
+    }
+
+    fechaInicioInput.addEventListener('change', calcularFechaFin);
+    duracionSelect.addEventListener('change', calcularFechaFin);
+
+    // Validar antes de enviar
+    document.querySelector("form").addEventListener("submit", function(e) {
+        if (!fechaFinInput.value) {
+            alert("Por favor selecciona la fecha de inicio y la duración del plan.");
+            e.preventDefault();
+        }
+    });
+</script>
+
+<style>
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: -1;
+}
+select, input {
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 8px;
+}
+
+option {
+  background: #333;
+  color: white;
+}
+
+.card {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 20px;
+    box-shadow: 0 4px 25px rgba(0, 0, 0, 0.3);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    animation: aparecerFlotante 1.2s ease-out forwards;
+}
+
+@keyframes aparecerFlotante {
+0% { opacity: 0; transform: translateY(50px) scale(0.9); }
+60% { opacity: 1; transform: translateY(-10px) scale(1.02); }
+100% { transform: translateY(0) scale(1); }
+}
+
+label {
+    color: #fff;
+    font-weight: 500;
+}
+
+.form-control, .form-select {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: #fff;
+}
+
+.form-control::placeholder {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.btn-success {
+    background-color: #28a745;
+    border: none;
+    transition: 0.3s;
+}
+
+.btn-success:hover {
+    background-color: #34d058;
+    transform: scale(1.03);
+}
+</style>
+{% endblock %}

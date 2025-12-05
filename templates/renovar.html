@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+
+{% block title %}Renovar Cliente - SSG{% endblock %}
+
+{% block content %}
+<div class="renovar-container">
+    <h1>🔁 Renovar Plan del Cliente</h1>
+    <p class="cliente-info"><strong>Cliente:</strong> {{ cliente.nombre }} ({{ cliente.cedula }})</p>
+
+    <form method="POST" class="form-renovar">
+        <label>Plan:</label>
+        <select name="plan" required>
+            <option value="">Seleccione...</option>
+            <option value="Básico" {% if cliente.plan == "Básico" %}selected{% endif %}>Básico</option>
+            <option value="Intermedio" {% if cliente.plan == "Intermedio" %}selected{% endif %}>Intermedio</option>
+            <option value="Avanzado" {% if cliente.plan == "Avanzado" %}selected{% endif %}>Avanzado</option>
+        </select>
+
+        <label>Forma de pago:</label>
+        <select name="forma_pago" required>
+            <option value="">Seleccione...</option>
+            <option value="Efectivo" {% if cliente.forma_pago == "Efectivo" %}selected{% endif %}>Efectivo</option>
+            <option value="Transferencia" {% if cliente.forma_pago == "Transferencia" %}selected{% endif %}>Transferencia</option>
+            <option value="Tarjeta" {% if cliente.forma_pago == "Tarjeta" %}selected{% endif %}>Tarjeta</option>
+        </select>
+
+        <label>💰 Valor a pagar:</label>
+        <input type="number" name="valor_pagar" value="{{ cliente.valor_pagar }}" required>
+
+        <label>📅 Fecha de inicio:</label>
+        <input type="datetime-local" id="fecha_inicio" name="fecha_inicio" required step="1">
+
+        <label>⏱️ Duración:</label>
+        <select id="duracion" name="duracion" required>
+            <option value="">Seleccione...</option>
+            <option value="15" {% if cliente.duracion == "15" %}selected{% endif %}>15 días</option>
+            <option value="30" {% if cliente.duracion == "30" %}selected{% endif %}>1 mes</option>
+            <option value="60" {% if cliente.duracion == "60" %}selected{% endif %}>2 meses</option>
+            <option value="90" {% if cliente.duracion == "90" %}selected{% endif %}>3 meses</option>
+            <option value="180" {% if cliente.duracion == "180" %}selected{% endif %}>6 meses</option>
+            <option value="365" {% if cliente.duracion == "365" %}selected{% endif %}>1 año</option>
+        </select>
+
+        <label>📆 Fecha de Retiro:</label>
+        <input type="text" id="fecha_retiro" name="fecha_retiro" value="{{ cliente.fecha_retiro }}" readonly>
+
+        <button type="submit" class="btn-guardar">💾 Guardar Cambios</button>
+        <a href="{{ url_for('inicio') }}" class="btn-cancelar">Cancelar</a>
+    </form>
+</div>
+
+<style>
+/* ==== EFECTO OPACIDAD SOBRE EL FONDO (mantiene imagen del base.html) ==== */
+body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: -1;
+}
+select {
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 8px;
+}
+
+option {
+  background: #333;
+  color: white;
+}
+
+/* ==== CONTENEDOR CENTRAL CON EFECTO VIDRIO ==== */
+.renovar-container {
+    width: 400px;
+    margin: 10vh auto;
+    background: rgba(255, 255, 255, 0.08);
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 10px 35px rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(12px);
+    animation: aparecerFlotante 1.2s ease-out forwards;
+}
+
+/* ==== ANIMACIÓN FLOTANTE SUAVE ==== */
+@keyframes aparecerFlotante {
+    0% {
+        opacity: 0;
+        transform: translateY(50px) scale(0.9);
+    }
+    60% {
+        opacity: 1;
+        transform: translateY(-10px) scale(1.02);
+    }
+    100% {
+        transform: translateY(0) scale(1);
+    }
+}
+
+.renovar-container h1 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #fff;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+.form-renovar {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.form-renovar label {
+    font-weight: 600;
+    color: #ddd;
+}
+
+.form-renovar input,
+.form-renovar select {
+    padding: 10px;
+    border: none;
+    border-radius: 10px;
+    outline: none;
+    background: rgba(255, 255, 255, 0.15);
+    color: #fff;
+    transition: background 0.3s ease;
+}
+
+.form-renovar input:focus,
+.form-renovar select:focus {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+/* ==== BOTONES ==== */
+.btn-guardar {
+    background-color: #16a34a;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.btn-guardar:hover {
+    background-color: #22c55e;
+    transform: scale(1.05);
+}
+
+.btn-cancelar {
+    text-align: center;
+    display: block;
+    margin-top: 10px;
+    color: #ccc;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.btn-cancelar:hover {
+    color: #fff;
+}
+</style>
+
+<script>
+
+// ==== Asignar automáticamente la hora actual al campo fecha_inicio ====
+function asignarHoraActual() {
+    const fechaInput = document.getElementById("fecha_inicio");
+    if (!fechaInput.value) {
+        const ahora = new Date();
+        const yyyy = ahora.getFullYear();
+        const mm = String(ahora.getMonth() + 1).padStart(2, '0');
+        const dd = String(ahora.getDate()).padStart(2, '0');
+        const hh = String(ahora.getHours()).padStart(2, '0');
+        const min = String(ahora.getMinutes()).padStart(2, '0');
+        const ss = String(ahora.getSeconds()).padStart(2, '0');
+        fechaInput.value = `${yyyy}-${mm}-${dd}T${hh}:${min}:${ss}`;
+    }
+}
+
+// Llamamos a la función cuando cargue la página
+window.addEventListener("DOMContentLoaded", asignarHoraActual);
+
+/* ==== AUTO-CÁLCULO DE FECHA DE RETIRO ==== */
+function actualizarFechaFin() {
+    const fechaInicio = document.getElementById('fecha_inicio').value;
+    const duracion = parseInt(document.getElementById('duracion').value);
+
+    if (fechaInicio && duracion) {
+        const inicio = new Date(fechaInicio);
+        inicio.setDate(inicio.getDate() + duracion);
+        const yyyy = inicio.getFullYear();
+        const mm = String(inicio.getMonth() + 1).padStart(2, '0');
+        const dd = String(inicio.getDate()).padStart(2, '0');
+        document.getElementById('fecha_retiro').value = `${dd}-${mm}-${yyyy}`;
+    } else {
+        document.getElementById('fecha_retiro').value = '';
+    }
+}
+
+document.getElementById('fecha_inicio').addEventListener('change', actualizarFechaFin);
+document.getElementById('duracion').addEventListener('change', actualizarFechaFin);
+actualizarFechaFin();
+</script>
+{% endblock %}

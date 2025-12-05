@@ -1,0 +1,219 @@
+{% extends "base.html" %}
+
+{% block title %}Listado de Clientes - GYM WORK{% endblock %}
+
+{% block content %}
+<style>
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: -1;
+}
+
+.listado-container {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.05));
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 35px;
+    border-radius: 25px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    width: 96%;
+    max-width: 1500px;
+    margin: 60px auto;
+    animation: floatUp 0.8s ease-out, floating 4s ease-in-out infinite;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* === ANIMACIÓN DE ENTRADA === */
+@keyframes floatUp {
+    from {
+        opacity: 0;
+        transform: translateY(40px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* === EFECTO FLOTANTE CONSTANTE === */
+@keyframes floating {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+}
+
+/* === TÍTULO === */
+.listado-container h1 {
+    color: #fff;
+    text-align: center;
+    margin-bottom: 20px;
+    font-weight: bold;
+}
+
+/* === FORMULARIO DE BÚSQUEDA === */
+.search-form {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 25px;
+}
+
+.search-form input {
+    width: 50%;
+    border-radius: 10px;
+    padding: 10px;
+    border: none;
+    outline: none;
+}
+
+.search-form button,
+.search-form a {
+    border-radius: 10px;
+    font-weight: bold;
+}
+
+/* === TABLA DE CLIENTES === */
+.table {
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 10px;
+    overflow: hidden;
+    width: 100%;
+}
+
+.table th {
+    background-color: #212529 !important;
+    color: #fff;
+    text-align: center;
+}
+
+.table td {
+    text-align: center;
+    font-weight: 500;
+}
+
+/* === ALERTA SIN CLIENTES === */
+.alert {
+    font-weight: bold;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    backdrop-filter: blur(5px);
+}
+
+/* === PAGINACIÓN (💎 NUEVO ESTILO) === */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    margin-top: 30px;
+}
+
+.pagination a, .pagination span {
+    color: #fff;
+    font-weight: bold;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 10px 22px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    box-shadow: 0 0 10px rgba(255,255,255,0.1);
+    transition: all 0.3s ease;
+    text-decoration: none;
+    backdrop-filter: blur(8px);
+}
+
+.pagination a:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.05);
+    box-shadow: 0 0 15px rgba(255,255,255,0.4);
+}
+
+.pagination span {
+    background: rgba(255, 255, 255, 0.2);
+    box-shadow: none;
+    cursor: default;
+}
+</style>
+
+<div class="listado-container">
+    <h1>🏋️‍♂️ Listado de Clientes</h1>
+
+    <!-- FORMULARIO DE BÚSQUEDA -->
+    <form method="get" action="{{ url_for('listado') }}" class="search-form">
+        <input type="text" name="q" placeholder="Buscar por nombre o cédula" value="{{ q }}">
+        <button type="submit" class="btn btn-primary">🔍 Buscar</button>
+        <a class="btn btn-success" href="{{ url_for('nuevo_cliente') }}">➕ Nuevo Cliente</a>
+    </form>
+
+    <!-- TABLA DE CLIENTES -->
+    {% if clientes %}
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered align-middle">
+            <thead>
+                <tr>
+                    <th>Cédula</th>
+                    <th>Nombre</th>
+                    <th>Teléfono</th>
+                    <th>Correo</th>
+                    <th>Forma de Pago</th>
+                    <th>Valor a Pagar</th>
+                    <th>Fecha Ingreso</th>
+                    <th>Fecha Retiro</th>
+                    <th>Días Restantes</th>
+                    <th>Estado</th>
+                    <th>Recibo</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for c in clientes %}
+                <tr class="{% if c.estatus == 'Vencido' %}table-danger{% elif c.estatus == 'Por vencer' %}table-warning{% else %}table-success{% endif %}">
+                    <td>{{ c.cedula }}</td>
+                    <td>{{ c.nombre }}</td>
+                    <td>{{ c.telefono }}</td>
+                    <td>{{ c.correo }}</td>
+                    <td>{{ c.forma_pago }}</td>
+                    <td>${{ "{:,.0f}".format(c.valor_pagar|float) }}</td>
+                    <td>{{ c.fecha_ingreso.strftime('%d/%m/%Y') if c.fecha_ingreso and c.fecha_ingreso.__class__.__name__ == 'datetime' else c.fecha_ingreso }}</td>
+                    <td>{{ c.fecha_retiro.strftime('%d/%m/%Y') if c.fecha_retiro and c.fecha_retiro.__class__.__name__ == 'datetime' else c.fecha_retiro }}</td>
+
+                    <td>
+                        {% if c.dias_faltantes is not none %}
+                            {{ c.dias_faltantes }} días
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    <td><strong>{{ c.estatus }}</strong></td>
+                    <td>
+                        <a href="{{ url_for('descargar_recibo', cedula=c.cedula) }}" class="btn btn-sm btn-outline-secondary">📄 PDF</a>
+                    </td>
+                    <td>
+                        <a href="{{ url_for('editar_cliente', cedula=c.cedula) }}" class="btn btn-sm btn-warning">✏️ Editar</a>
+                        <form action="{{ url_for('eliminar_cliente', cedula=c.cedula) }}" method="POST" style="display:inline;">
+                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('¿Seguro que deseas eliminar este cliente?')">🗑️</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 💎 PAGINACIÓN CON NUEVO ESTILO -->
+    <div class="pagination">
+        {% if page > 1 %}
+            <a href="{{ url_for('listado', page=page-1, q=q) }}">⬅️ Anterior</a>
+        {% endif %}
+        <span>Página {{ page }} de {{ total_pages }}</span>
+        {% if page < total_pages %}
+            <a href="{{ url_for('listado', page=page+1, q=q) }}">Siguiente ➡️</a>
+        {% endif %}
+    </div>
+
+    {% else %}
+    <div class="alert alert-info text-center">📭 No hay clientes registrados o no se encontraron resultados.</div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% block title %}Clientes Próximos a Vencer{% endblock %}
+
+{% block content %}
+<div class="container-proximos">
+  <div class="card-proximos">
+    <h1 class="titulo">⚠️ Clientes próximos a vencer</h1>
+
+    {% if proximos_vencer %}
+    <table>
+      <thead>
+        <tr>
+          <th>Nombre</th>
+          <th>Cédula</th>
+          <th>Plan</th>
+          <th>Días Restantes</th>
+          <th>Acción</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in proximos_vencer %}
+        <tr>
+          <td>{{ c.nombre }}</td>
+          <td>{{ c.cedula }}</td>
+          <td>{{ c.plan }}</td>
+          <td>{{ c.dias_restantes }}</td>
+          <td>
+            <a href="{{ url_for('renovar_cliente', cedula=c.cedula) }}" class="btn-renovar">🔁 Renovar</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p class="no-encontrado">✅ No hay clientes próximos a vencer.</p>
+    {% endif %}
+  </div>
+</div>
+
+<style>
+    body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: -1;
+}
+.container-proximos {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh;
+}
+.card-proximos {
+  background: rgba(255,255,255,0.2);
+  backdrop-filter: blur(10px);
+  padding: 3rem 1rem 3rem 1rem;
+  border-radius: 30px;
+  width: 90%;
+  max-width: 800px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.3);
+  animation: floatIn 1s ease forwards;
+  opacity: 0;
+  border: 1px solid rgba(255,255,255,0.2);
+}
+
+@keyframes floatIn {
+  from { transform: translateY(30px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1.5rem;
+}
+th, td {
+  border-bottom: 1px solid rgba(255,255,255,0.2);
+  padding: 0.8rem;
+  text-align: center;
+  color: white;
+}
+th {
+  background: rgba(21,36,113,0.7);
+  text-transform: uppercase;
+}
+.btn-renovar {
+  background-color: #152471;
+  color: white;
+  padding: 5px 15px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: bold;
+  transition: 0.3s;
+}
+.btn-renovar:hover {
+  background-color: #1f3fa5;
+}
+.titulo {
+  color: white;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+.no-encontrado {
+  color: #00ff88;
+  text-align: center;
+  font-weight: bold;
+}
+</style>
+{% endblock %}

@@ -1,0 +1,274 @@
+{% extends "base.html" %}
+{% block title %}Estadísticas - GYM WORK{% endblock %}
+
+{% block content %}
+<style>
+body {
+    font-family: 'Poppins', sans-serif;
+    color: #fff;
+}
+
+/* Contenedor general */
+.contenedor {
+    max-width: 1200px;
+    margin: 70px auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 50px;
+    padding: 0 20px;
+}
+
+/* Tarjetas */
+.card {
+    background: rgba(25, 25, 35, 0.75);
+    border: 1px solid rgba(0, 255, 204, 0.15);
+    border-radius: 22px;
+    box-shadow: 0 4px 30px rgba(0, 255, 204, 0.08);
+    backdrop-filter: blur(18px);
+    padding: 35px;
+    width: 100%;
+    max-width: 1100px;
+    transition: all 0.35s ease;
+}
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 30px rgba(0, 255, 204, 0.25);
+}
+.card h2 {
+    color: #00ffcc;
+    text-align: center;
+    font-size: 26px;
+    font-weight: 600;
+    margin-bottom: 25px;
+    text-shadow: 0 0 10px rgba(0, 255, 204, 0.5);
+}
+
+/* Formularios */
+form {
+    text-align: center;
+    margin-bottom: 20px;
+}
+input, button {
+    padding: 8px 14px;
+    border-radius: 6px;
+    border: none;
+    font-weight: 600;
+    margin-left: 5px;
+}
+button {
+    background-color: #00ffcc;
+    color: black;
+    cursor: pointer;
+    transition: 0.3s;
+}
+button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 10px rgba(0,255,204,0.6);
+}
+
+/* Contenedor del gráfico */
+.grafico-container {
+    position: relative;
+    width: 100%;
+    max-width: 900px;
+    height: 360px;
+    margin: 0 auto;
+}
+canvas {
+    width: 100% !important;
+    height: 100% !important;
+    background: transparent !important;
+    border-radius: 12px;
+}
+</style>
+
+<div class="contenedor">
+
+    <!-- 🔹 Resumen general -->
+    <div class="card">
+        <h2>📋 Resumen General</h2>
+        <div style="display:flex; justify-content:center; gap:30px; flex-wrap:wrap;">
+            <div class="estadistica">
+                <h3>Hoy</h3>
+                <p>{{ diarios }}</p>
+            </div>
+            <div class="estadistica">
+                <h3>Semana</h3>
+                <p>{{ semanales }}</p>
+            </div>
+            <div class="estadistica">
+                <h3>Mes</h3>
+                <p>{{ mensuales }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🔹 Diario -->
+    <div class="card">
+        <h2>📅 Estadística Diaria</h2>
+        <form method="POST">
+            <input type="date" name="fecha" value="{{ fecha_seleccionada }}">
+            <button type="submit">Consultar</button>
+        </form>
+        <div class="grafico-container">
+            <canvas id="graficoDiario"></canvas>
+        </div>
+    </div>
+
+    <!-- 🔹 Semanal -->
+    <div class="card">
+        <h2>📆 Estadística Semanal</h2>
+        <form method="POST">
+            <input type="week" name="semana" value="{{ semana_seleccionada }}">
+            <button type="submit">Consultar</button>
+        </form>
+        <div class="grafico-container">
+            <canvas id="graficoSemanal"></canvas>
+        </div>
+    </div>
+
+    <!-- 🔹 Mensual -->
+    <div class="card">
+        <h2>📈 Estadística Mensual</h2>
+        <form method="POST">
+            <input type="month" name="mes" value="{{ mes_seleccionado }}">
+            <button type="submit">Consultar</button>
+        </form>
+        <div class="grafico-container">
+            <canvas id="graficoMensual"></canvas>
+        </div>
+    </div>
+
+    <!-- 🔹 Métodos de pago -->
+    <div class="card">
+        <h2>💳 Métodos de Pago</h2>
+        <div class="grafico-container">
+            <canvas id="graficoPagos"></canvas>
+        </div>
+    </div>
+
+</div>
+
+<!-- Datos Flask -->
+<script id="data-pagos" type="application/json">{{ metodos_pago | tojson | safe }}</script>
+<script id="data-horas" type="application/json">{{ registros_por_hora | tojson | safe }}</script>
+<script id="data-semanales" type="application/json">{{ registros_semanales | tojson | safe }}</script>
+<script id="data-mensuales" type="application/json">{{ registros_mensuales | tojson | safe }}</script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const datosPagos = JSON.parse(document.getElementById("data-pagos").textContent);
+const datosHoras = JSON.parse(document.getElementById("data-horas").textContent);
+const datosSemanal = JSON.parse(document.getElementById("data-semanales").textContent);
+const datosMensual = JSON.parse(document.getElementById("data-mensuales").textContent);
+
+// ---------- Diario ----------
+new Chart(document.getElementById("graficoDiario"), {
+    type: "bar",
+    data: {
+        labels: Object.keys(datosHoras),
+        datasets: [{
+            label: "Registros por hora",
+            data: Object.values(datosHoras),
+            backgroundColor: "rgba(0,255,204,0.6)",
+            borderColor: "#00ffcc",
+            borderWidth: 1.5
+        }]
+    },
+    options: {
+        plugins: { legend: { display: false } },
+        scales: {
+            x: { ticks: { color: "#fff" } },
+            y: { ticks: { color: "#fff" }, beginAtZero: true }
+        }
+    }
+});
+
+// ---------- Semanal ----------
+new Chart(document.getElementById("graficoSemanal"), {
+    type: "bar",
+    data: {
+        labels: ["L", "M", "MI", "J", "V", "S", "D"],
+        datasets: [{
+            label: "Registros por día",
+            data: Object.values(datosSemanal),
+            backgroundColor: "rgba(54,162,235,0.6)",
+            borderColor: "#36a2eb",
+            borderWidth: 1.5
+        }]
+    },
+    options: {
+        plugins: { legend: { display: false } },
+        scales: {
+            x: { ticks: { color: "#fff" } },
+            y: { ticks: { color: "#fff" }, beginAtZero: true }
+        }
+    }
+});
+
+// ---------- Mensual ----------
+new Chart(document.getElementById("graficoMensual"), {
+    type: "line",
+    data: {
+        labels: Object.keys(datosMensual.actual),
+        datasets: [
+            {
+                label: "Mes actual",
+                data: Object.values(datosMensual.actual),
+                borderColor: "#00ffcc",
+                backgroundColor: "rgba(0,255,204,0.4)",
+                tension: 0.3,
+                fill: true
+            },
+            {
+                label: "Mes anterior",
+                data: Object.values(datosMensual.anterior),
+                borderColor: "#ff6384",
+                backgroundColor: "rgba(255,99,132,0.3)",
+                tension: 0.3,
+                fill: true
+            }
+        ]
+    },
+    options: {
+        plugins: { legend: { labels: { color: "#fff" } } },
+        scales: {
+            x: { ticks: { color: "#fff" } },
+            y: { ticks: { color: "#fff" }, beginAtZero: true }
+        }
+    }
+});
+
+// ---------- Métodos de Pago ----------
+new Chart(document.getElementById("graficoPagos"), {
+    type: "doughnut",
+    data: {
+        labels: Object.keys(datosPagos),
+        datasets: [{
+            data: Object.values(datosPagos),
+            backgroundColor: [
+                "rgba(0,255,204,0.8)",
+                "rgba(255,99,132,0.8)",
+                "rgba(54,162,235,0.8)",
+                "rgba(255,206,86,0.8)",
+                "rgba(153,102,255,0.8)"
+            ],
+            borderColor: "#0b0b0f",
+            borderWidth: 2
+        }]
+    },
+    options: {
+        plugins: {
+            legend: { labels: { color: "#fff" }, position: "bottom" },
+            tooltip: {
+                backgroundColor: "rgba(0,0,0,0.8)",
+                titleColor: "#00ffcc",
+                bodyColor: "#fff"
+            }
+        },
+        cutout: "65%"
+    }
+});
+</script>
+{% endblock %}

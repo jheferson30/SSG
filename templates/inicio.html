@@ -1,0 +1,220 @@
+{% extends "base.html" %}
+
+{% block title %}Inicio - SSG{% endblock %}
+
+{% block content %}
+<div class="container-busqueda">
+  <div class="card-busqueda">
+    <h1 class="titulo">🔍 Buscar Cliente</h1>
+    <form method="POST" class="form-busqueda">
+      <input type="text" name="cedula" placeholder="Ingrese la cédula del cliente" required>
+      <button type="submit">Buscar</button>
+    </form>
+
+    {% if cliente %}
+    <div class="card-cliente">
+      <h2>Información del Cliente</h2>
+      <div class="info">
+        <p><strong>🪪 Cédula:</strong> {{ cliente.cedula }}</p>
+        <p><strong>👤 Nombre:</strong> {{ cliente.nombre }}</p>
+        <p><strong>📞 Teléfono:</strong> {{ cliente.telefono }}</p>
+        <p><strong>✉️ Correo:</strong> {{ cliente.correo }}</p>
+        <p><strong>💪 Plan:</strong> {{ cliente.plan }}</p>
+        <p><strong>⚙️ Estado:</strong> {{ cliente.estatus }}</p>
+        <p><strong>📅 Fecha de ingreso:</strong> {{ cliente.fecha_ingreso.strftime('%d/%m/%Y') }}</p>
+        <p><strong>⏳ Días restantes:</strong> {{ dias_restantes }}</p>
+      </div>
+      <div class="text-center mt-3">
+        <a href="{{ url_for('renovar_cliente', cedula=cliente.cedula) }}" class="btn-renovar">🔁 Renovar</a>
+      </div>
+    </div>
+    {% endif %}
+
+    {% if no_encontrado %}
+    <p class="no-encontrado">{{ no_encontrado }}</p>
+    {% endif %}
+
+  </div>
+</div>
+
+<div style="text-align: center; margin-top: 20px;">
+  <button id="campana-alerta"
+          onclick="window.location.href='/proximos_vencer'"
+          style="background: rgba(0, 0, 0, 0.4);
+                 border: none;
+                 border-radius: 50%;
+                 width: 55px;
+                 height: 55px;
+                 backdrop-filter: blur(10px);
+                 box-shadow: 0 0 10px rgba(0,0,0,0.6);
+                 cursor: pointer;
+                 position: relative;">
+    <i class="fa fa-bell" style="font-size: 24px; color: white;"></i>
+    <span id="contador-alertas"
+          style="position: absolute; top: -5px; right: -5px;
+                 background: red; color: white;
+                 border-radius: 50%; padding: 2px 7px;
+                 font-size: 12px; font-weight: bold;">
+    </span>
+  </button>
+</div>
+
+<!-- FIN CAMBIO #1 -->
+
+<script>
+  async function mostrarAlertas() {
+    try {
+      const respuesta = await fetch("/alertas");
+      const datos = await respuesta.json();
+      if (datos.length > 0) {
+        let mensaje = "⚠️ Clientes próximos a vencer:\n\n";
+        datos.forEach(c => {
+          mensaje += `${c.nombre} — Restan ${c.dias_restantes} días\n`;
+        });
+        alert(mensaje);
+      } else {
+        alert("✅ No hay clientes próximos a vencer.");
+      }
+    } catch (error) {
+      console.error("Error al cargar alertas:", error);
+    }
+  }
+
+  async function verificarAlertas() {
+    try {
+      const respuesta = await fetch("/alertas");
+      const datos = await respuesta.json();
+      const contador = document.getElementById("contador-alertas");
+      const campana = document.getElementById("campana-alerta");
+
+      if (datos.length > 0) {
+        contador.textContent = datos.length;
+        campana.style.display = "inline-block";
+      } else {
+        campana.style.display = "none";
+      }
+    } catch (error) {
+      console.error("Error verificando alertas:", error);
+    }
+  }
+
+  verificarAlertas();
+</script>
+
+<style>
+.btn-renovar {
+  background-color: #152471;
+  color: white;
+  padding: 10px 25px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: bold;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+  transition: 0.3s;
+}
+.btn-renovar:hover {
+  background-color: #1f3fa5;
+  transform: scale(1.05);
+}
+.container-busqueda {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh;
+}
+.card-busqueda {
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(12px);
+  border-radius: 20px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+  padding: 2rem;
+  width: 100%;
+  max-width: 500px;
+  text-align: center;
+  animation: floatIn 1s ease forwards;
+  opacity: 0;
+  border: 1px solid rgba(255,255,255,0.2);
+}
+@keyframes floatIn {
+  from { transform: translateY(30px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+.titulo {
+  color: #f0f0f4;
+  margin-bottom: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  animation: fadeZoom 1s ease;
+}
+@keyframes fadeZoom {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+.form-busqueda {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+.form-busqueda input {
+  flex: 1;
+  padding: 0.6rem;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  outline: none;
+}
+.form-busqueda button {
+  background-color: #152471; 
+  color: white;
+  border: none;
+  padding: 0.6rem 1rem;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.3s ease;
+}
+.form-busqueda button:hover {
+  background-color: #1f3fa5;
+  transform: scale(1.05);
+}
+.card-cliente {
+  margin-top: 1rem;
+  background: #5a6068;
+  border-radius: 10px;
+  padding: 1rem;
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+  animation: slideUp 0.8s ease forwards;
+  opacity: 0;
+}
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+.card-cliente h2 {
+  color: #dadadc;
+  margin-bottom: 1rem;
+}
+.card-cliente .info p {
+  text-align: left;
+  margin: 0.3rem 0;
+}
+.no-encontrado {
+  color: rgb(230, 10, 54);
+  font-weight: bold;
+}
+body::before { 
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4); 
+  z-index: -1;
+  opacity: 0;
+  animation: fadeInOverlay 0.8s ease forwards;
+}
+@keyframes fadeInOverlay { 
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+</style>
+{% endblock %}
