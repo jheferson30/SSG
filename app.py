@@ -8,11 +8,30 @@ app = Flask(__name__)
 app.secret_key = "mi_clave_super_secreta_123"
 
 # =======================
-# CONEXIÓN A MONGODB
+# CONEXIÓN A MONGODB ATLAS (¡MODIFICADO!)
 # =======================
-mongo_client = MongoClient("mongodb://localhost:27017/")
-db = mongo_client["gymwork"]
-clientes_collection = db["clientes"]
+
+MONGO_URI = os.environ.get('MONGO_URI')
+
+
+if not MONGO_URI:
+ 
+    MONGO_URI = "mongodb://localhost:27017/" 
+    
+
+try:
+    
+    mongo_client = MongoClient(MONGO_URI)
+    
+   
+    db = mongo_client["gymwork"] 
+    clientes_collection = db["clientes"]
+    
+
+except Exception as e:
+   
+    print(f"❌ ERROR FATAL AL CONECTAR A MONGODB: {e}")
+    
 
 # Carpeta donde se guardan los PDF
 RUTA_RECIBOS = "recibos"
