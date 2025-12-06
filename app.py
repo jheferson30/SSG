@@ -12,18 +12,16 @@ app.secret_key = "mi_clave_super_secreta_123"
 # =======================
 
 MONGO_URI = os.environ.get('MONGO_URI')
-clientes_collection = None # 👈 ¡Definición global para evitar NameError!
+clientes_collection = None  # Definición global
 
 try:
     mongo_client = MongoClient(MONGO_URI)
-    db = mongo_client["trabajo de gimnasio"] 
-    clientes_collection = db["clientes"] # 👈 Asignación si es exitoso
+    db = mongo_client["gymwork"]  # ✔ SIN ESPACIOS - TU BASE REAL
+    clientes_collection = db["clientes"]  # ✔ Tu colección real
     print("✅ Conexión a MongoDB establecida correctamente.")
 
 except Exception as e:
     print(f"❌ ERROR FATAL AL CONECTAR A MONGODB: {e}")
-    # Puedes crear una colección falsa para que la app no falle por completo
-    # Si quieres, puedes omitir esta línea, pero es solo para debugging local.
 
 # Carpeta donde se guardan los PDF
 RUTA_RECIBOS = "recibos"
