@@ -8,29 +8,22 @@ app = Flask(__name__)
 app.secret_key = "mi_clave_super_secreta_123"
 
 # =======================
-# CONEXIÓN A MONGODB ATLAS (¡VERSIÓN FINAL PARA VERCEL!)
+# CONEXIÓN A MONGODB ATLAS
 # =======================
 
 MONGO_URI = os.environ.get('MONGO_URI')
-
-# ❌ ELIMINAMOS EL BLOQUE 'if not MONGO_URI' 
-# Esto fuerza al despliegue a fallar si la variable no está, 
-# en lugar de intentar usar localhost.
+clientes_collection = None # 👈 ¡Definición global para evitar NameError!
 
 try:
-    # Si MONGO_URI es 'None' (variable no encontrada), 
-    # esto generará una excepción que será atrapada y registrada.
     mongo_client = MongoClient(MONGO_URI)
-    
-    # Base de datos que restauraste
     db = mongo_client["trabajo de gimnasio"] 
-    clientes_collection = db["clientes"]
+    clientes_collection = db["clientes"] # 👈 Asignación si es exitoso
     print("✅ Conexión a MongoDB establecida correctamente.")
 
 except Exception as e:
-    # Este print se registrará en los logs de Vercel si falla.
-    print(f"❌ ERROR FATAL AL CONECTAR A MONGODB (Usando MONGO_URI): {e}")
-    
+    print(f"❌ ERROR FATAL AL CONECTAR A MONGODB: {e}")
+    # Puedes crear una colección falsa para que la app no falle por completo
+    # Si quieres, puedes omitir esta línea, pero es solo para debugging local.
 
 # Carpeta donde se guardan los PDF
 RUTA_RECIBOS = "recibos"
