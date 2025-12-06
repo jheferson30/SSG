@@ -23,7 +23,7 @@ try:
     mongo_client = MongoClient(MONGO_URI)
     
     # Base de datos que restauraste
-    db = mongo_client["gymwork"] 
+    db = mongo_client["trabajo de gimnasio"] 
     clientes_collection = db["clientes"]
     print("✅ Conexión a MongoDB establecida correctamente.")
 
